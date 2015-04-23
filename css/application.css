@@ -1,0 +1,9 @@
+.container-wrapper {
+  margin: 20px 0;
+  background: #eee;
+}
+
+td.legendColorBox > div > div {
+  border-radius: 10px;
+  padding: 5px !important;;
+}

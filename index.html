@@ -14,6 +14,8 @@
     <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="bower_components/jquery-flot/jquery.flot.js"></script>
     <script type="text/javascript" src="bower_components/jquery-flot/jquery.flot.time.js"></script>
+    <script type="text/javascript" src="bower_components/jquery-flot/jquery.flot.pie.js"></script>
+    <script type="text/javascript" src="bower_components/jquery-flot/jquery.flot.categories.js"></script>
     <script type="text/javascript" src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
     <script type="text/javascript" src="bower_components/bootstrap-select/dist/js/bootstrap-select.min.js"></script>
@@ -44,11 +46,11 @@
             <p class="text-muted">Media coverage of issues in the run up to the election</p>
           </div>
           <div class="col-md-3">
-            <select name="source" class="form-control input-lg">
-              <option value="all">Cross media coverage<option>
-            </select>
-            <br/>
-            <br/>
+            <div style="height: 60px;">
+              <select name="source" class="form-control input-lg">
+                <option value="all">Cross media coverage<option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
@@ -83,15 +85,17 @@
       <div class="row">
         <div class="col-md-12">
           <h2 class="text-center"><i class="fa fa-fw fa-line-chart"></i> Parties in the media</h2>
-          <h4 class="text-center text-muted">NUMBER OF ARTICLES PER DAY</h4>
-          <div class="row">
+          <div id="parties-loading">
+            <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
+          </div>
+          <div id="parties" class="row">
             <div class="col-md-9">
-              <div id="parties" style="height: 300px;"></div>
+              <div class="graph" style="height: 300px;"></div>
               <br/>
             </div>
             <div class="col-md-3">
               <div class="hidden-sm hidden-xs" style="height: 50px;">&nbsp;</div>
-              <div id="parties-legend" class="lead"></div>
+              <div class="legend" class="lead"></div>
             </div>
           </div>
         </div>
@@ -102,7 +106,11 @@
         <div class="row">
           <div class="col-md-12">
             <h2 class="text-center"><i class="fa fa-fw fa-bar-chart"></i> Issues in the media</h2>
-            <div id="issues-timeseries" class="row"></div>
+            <div id="issues-timeseries-loading">
+              <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
+            </div>
+            <div id="issues-totals" style="height: 200px;"></div>
+            <div id="issues-timeseries"></div>
             <br/>
           </div>
         </div>

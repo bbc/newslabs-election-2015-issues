@@ -36,40 +36,31 @@ var parties = [ { name: "Labour Party",
               ];
               
 var issues = [ {  name: "Education",
-                  query: "education OR schools OR university OR univercities",
-                  color: "#CA0914"
+                  query: "education OR schools OR university OR universities"
                 },
                 { name: "Immigration",
-                  query: "immigration OR immigrants OR migrants",
-                  color: "#CA0914"
+                  query: "immigration OR immigrants OR migrants"
                 },
                 { name: "Economy",
-                  query: "economy OR economics",
-                  color: "#CA0914"
+                  query: "economy OR economics"
                 },
                 { name: "Law and Order",
-                  query: "crime OR policing OR prisons",
-                  color: "#CA0914"
+                  query: "crime OR policing OR prisons"
                 },
                 { name: "Healthcare",
-                  query: 'NHS OR "National Health Service" OR healthcare',
-                  color: "#CA0914"
+                  query: 'NHS OR "National Health Service" OR healthcare'
                 },
                 { name: "Pensions",
-                  query: 'pension OR pensions',
-                  color: "#CA0914"
+                  query: 'pension OR pensions'
                 },
                 { name: "European Union",
-                  query: '"European Union" OR EU',
-                  color: "#CA0914"
+                  query: '"European Union" OR EU'
                 },
                 { name: "Taxation",
-                  query: 'tax OR taxation',
-                  color: "#CA0914"
+                  query: 'tax OR taxation'
                 },
                 { name: "Housing",
-                  query: 'houses OR house OR housing',
-                  color: "#CA0914"
+                  query: 'houses OR house OR housing'
                 }
               ];
               
@@ -133,23 +124,14 @@ function getSourcesFromJuicer() {
 };
 
 function updatePage() {
-   
-  plotPartiesGraph('#parties', '#parties-legend', parties, selectedSources);
-  
-  $('#issues-timeseries').html('');
-  $(issues).each(function(index, issue) {
-    plotIssuesGraph(index, issues[index], selectedSources);
-  });
-  // $(graphs).each(function(index, graph) {
-  //   var axes = graph.getAxes();
-  //   axes.yaxis.options.max = maxGraphYAxis;
-  //   graph.setupGrid();
-  //   graph.draw();
-  // });
-  
+  $("#parties-loading").slideDown();
+  $("#issues-timeseries-loading").slideDown();
+
+  plotPartiesGraph(parties, selectedSources);  
+  plotIssuesTimeseries(issues, selectedSources);
 }
 
-function plotPartiesGraph(graphSelector, legendSelector, things, sources) {
+function plotPartiesGraph(things, sources) {
   var graphOptions = {
        shadowSize: 0,
        grid: { borderWidth: 0 },
@@ -169,7 +151,7 @@ function plotPartiesGraph(graphSelector, legendSelector, things, sources) {
           fill: false
         },
         legend: { show: true,
-                  container: $(legendSelector),
+                  container: $("#parties .legend"),
                   placement: 'outsideGrid',
                   labelBoxBorderColor: "transparent",
                   backgroundOpacity: 0,
@@ -178,7 +160,7 @@ function plotPartiesGraph(graphSelector, legendSelector, things, sources) {
   };
   var promises = [];
   var timeseries = [];
-  
+
   $(things).each(function(index, thing) {
     var promise = getMentions(thing, sources, start, end, timeseries);
     promises.push(promise);
@@ -194,26 +176,22 @@ function plotPartiesGraph(graphSelector, legendSelector, things, sources) {
           colors.push(thing.color);
         });
         graphOptions.colors = colors;
-        
-        if (legendSelector != null) {
-          graphOptions.legend.container = $(legendSelector);
-          graphOptions.legend.show = true;
-        } else {
-          graphOptions.legend.container = null;
-          graphOptions.legend.show = false;
-        }
-        
+                
        // Draw graph
-       var graph = $.plot(graphSelector, timeseries, graphOptions);
+       var graph = $.plot("#parties .graph", timeseries, graphOptions);
+       
+       $("#parties-loading").slideUp();
        
   }, function(e) {
-       console.log("Request failed");
+     console.log("Request failed");
   });
 }
 
-function plotIssuesGraph(issueNumber, things, sources) {
+
+function plotIssuesTimeseries(issues, sources) {
   var graphOptions = {
        shadowSize: 0,
+       colors: [ "#CA0914" ],
        grid: { borderWidth: 0 },
        xaxis: { mode: "time",
                 tickLength: 0,
@@ -234,42 +212,86 @@ function plotIssuesGraph(issueNumber, things, sources) {
   };  
   var promises = [];
   var timeseries = [];
+  var issueTotalsData = [];
   
-  $(things).each(function(index, thing) {
-    var promise = getMentions(thing, sources, start, end, timeseries);
+  $('#issues-timeseries').html('');
+  
+  $(issues).each(function(index, issue) {
+    timeseries[index] = [];
+    var promise = getMentions(issue, sources, start, end, timeseries[index]);
     promises.push(promise);
   });
   
   $.when.apply($, promises).then(function(data) {
-    
-        // Sort by most results
-        timeseries.sort(function(a,b) { return b.total - a.total; } );
+      var maxGraphYAxis = 10;
+      var colors = [];
       
-        var colors = [];
-        $(timeseries).each(function(index, thing) {
-           var html ='<div id="issue-'+issueNumber+'-'+index+'" class="col-md-4 pull-left sort" data-sort="'+thing.total+'">'
-                    +'  <h3 class="text-muted text-center">'+thing.label+'</h3>'
-                    +'  <div class="graph" style="height: 200px;"></div>'
-                    +'  <br/><br/>'
-                    +'</div>';
-           $('#issues-timeseries').append(html);
-          colors.push(thing.color);
-        });
-        graphOptions.colors = colors;
-                
-       // Draw graph
-        $(timeseries).each(function(index, thing) {
-          var graph = $.plot('#issue-'+issueNumber+'-'+index+' .graph', timeseries, graphOptions);
-        });       
-        
-       var wrapper = $('#issues-timeseries');
-       wrapper.find('div.sort').sort(function (a, b) {
-         return $(b).attr('data-sort') - $(a).attr('data-sort');
-       })
-       .appendTo( wrapper );
+      $(timeseries).each(function(index, thing) {
+        //issueTotalsData.push( { label: thing[0].label, data: [ thing[0].total ] });
+        issueTotalsData.push([ thing[0].label, thing[0].total ]);
+         var html ='<div id="issue-'+index+'" class="col-md-4 col-sm-12 col-xs-12 pull-left sort" data-sort="'+thing[0].total+'">'
+                  +'  <h3 class="text-muted text-center">'+thing[0].label+'</h3>'
+                  +'  <div class="graph" style="height: 200px;"></div>'
+                  +'  <br/><br/>'
+                  +'</div>';
+         $('#issues-timeseries').append(html);
+         
+         $(thing[0].data).each(function(index, object) {
+           if (object[1] > maxGraphYAxis)
+             maxGraphYAxis = object[1];
+         });
+      });
+
+      graphOptions.yaxis.max = maxGraphYAxis;
+
+     // Draw graph
+      $(timeseries).each(function(index, thing) {
+        var graph = $.plot('#issue-'+index+' .graph', timeseries[index], graphOptions);
+      });
+  
+      /*
+     var wrapper = $('#issues-timeseries');
+     wrapper.find('div.sort').sort(function (a, b) {
+       return $(b).attr('data-sort') - $(a).attr('data-sort');
+     })
+     .appendTo( wrapper );
+      */
+     
+     // Sort by most results
+     // issueTotalsData.sort(function(a,b) { return b[1] - a[1]; } );
+     
+     $.plot('#issues-totals', [ issueTotalsData ], {
+         shadowSize: 0,
+         colors: [ "#CA0914" ],
+         grid: { borderWidth: 0 },
+         legend: { show: false },
+         bars: {
+           show: true,
+           barWidth: 0.6,
+           align: "center",
+            lineWidth: 2,
+            fill: true,
+           fillColor: "#CA0914"
+         },
+         yaxis: {
+             tickLength: 0,
+         },
+         xaxis: {
+            mode: "categories",
+             tickLength: 0
+          }
+         // series: {
+         //     pie: {
+         //         show: true,
+         //         innerRadius: 0.3,
+         //     }
+         // }
+     });
+     
+     $("#issues-timeseries-loading").slideUp();
 
   }, function(e) {
-       console.log("Request failed");
+     console.log("Request failed");
   });
 }
 

@@ -5,7 +5,7 @@ var juicer = {
 };
 
 // IDs of media sources to use
-var sources = [1, 3, 8, 10, 11, 12, 14, 22, 23, 24, 40, 41, 42, 43, 44, 45, 70, 71, 72, 85, 89, 160, 166];
+var sources = [1, 3, 8, 10, 11, 12, 22, 23, 24, 40, 42, 43, 45, 71, 72, 85];
 var selectedSources = sources;
 
 // URIs of political parties to include in comparison chart
@@ -89,6 +89,13 @@ $(document).on("change", 'select[name="source"]', function(event) {
   updatePage();
 });
 
+// Redraw page on window resize
+$(window).resize(function() {
+    clearTimeout($.data(this, 'resizeTimer'));
+    $.data(this, 'resizeTimer', setTimeout(function() {
+      updatePage();
+    }, 1000));
+});
 
 $(function() {
   getSourcesFromJuicer();
@@ -96,7 +103,7 @@ $(function() {
 });
 
 function getSourcesFromJuicer() {
-  $("#juicer-loading").slideDown();
+  $("#juicer-loading").show();
   var juicerSources = $("#juicer-sources");
   juicerSources.html('<br/><p class="lead text-center">Updating sources...</p>')
   $.ajax({
@@ -124,40 +131,17 @@ function getSourcesFromJuicer() {
 };
 
 function updatePage() {
-  $("#parties-loading").slideDown();
-  $("#issues-timeseries-loading").slideDown();
+  // Reset all graphs and show all loading graphics
+  $(".graph").html('');
+  $(".legend").html('');
+  $("#parties-loading").show();
+  $("#issues-timeseries-loading").show();
 
-  plotPartiesGraph(parties, selectedSources);  
+  plotPartiesGraph(parties, selectedSources);
   plotIssuesTimeseries(issues, selectedSources);
 }
 
 function plotPartiesGraph(things, sources) {
-  var graphOptions = {
-       shadowSize: 0,
-       grid: { borderWidth: 0 },
-       xaxis: { mode: "time",
-                tickLength: 0,
-                timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
-                minTickSize: [5, 'day'], 
-        },
-        yaxis: { tickLength: 0,
-                 tickDecimals: 0,
-                 minTickSize: 1
-        },
-        lines: {
-          show: true,
-          steps: false,
-          lineWidth: 3,
-          fill: false
-        },
-        legend: { show: true,
-                  container: $("#parties .legend"),
-                  placement: 'outsideGrid',
-                  labelBoxBorderColor: "transparent",
-                  backgroundOpacity: 0,
-                  labelFormatter: function(label, series) { return "&nbsp; "+label; }
-         }
-  };
   var promises = [];
   var timeseries = [];
 
@@ -168,19 +152,85 @@ function plotPartiesGraph(things, sources) {
   
   $.when.apply($, promises).then(function(data) {
     
+        var totals = [];
+      
         // Sort by most results
         timeseries.sort(function(a,b) { return b.total - a.total; } );
       
         var colors = [];
         $(timeseries).each(function(index, thing) {
+          console.log(thing);
+          totals.push({ label: thing.label, data: [ thing.total] });
           colors.push(thing.color);
         });
-        graphOptions.colors = colors;
                 
        // Draw graph
-       var graph = $.plot("#parties .graph", timeseries, graphOptions);
+       var graph = $.plot("#parties .graph",
+                          timeseries,
+                          {
+                           shadowSize: 0,
+                           colors: colors,
+                           grid: { borderWidth: 0 },
+                           xaxis: { mode: "time",
+                                    tickLength: 0,
+                                    timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
+                                    minTickSize: [5, 'day'], 
+                            },
+                            yaxis: { tickLength: 0,
+                                     tickDecimals: 0,
+                                     minTickSize: 1
+                            },
+                            lines: {
+                              show: true,
+                              steps: false,
+                              lineWidth: 2.5,
+                              fill: false
+                            },
+                            legend: { show: true,
+                                      container: $("#parties-legend"),
+                                      placement: 'outsideGrid',
+                                      labelBoxBorderColor: "transparent",
+                                      backgroundOpacity: 0,
+                                      labelFormatter: function(label, series) { return "&nbsp; "+label; }
+                             }
+                        });
+                        
+     var graph = $.plot("#parties-pie .graph",
+                        totals,
+                        {
+                         shadowSize: 0,
+                         colors: colors,
+                         grid: { borderWidth: 0 },
+                         xaxis: { mode: "time",
+                                  tickLength: 0,
+                                  timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
+                                  minTickSize: [5, 'day'], 
+                          },
+                          yaxis: { tickLength: 0,
+                                   tickDecimals: 0,
+                                   minTickSize: 1
+                          },
+                          lines: {
+                            show: true,
+                            steps: false,
+                            lineWidth: 3,
+                            fill: false
+                          },
+                          legend: { show: false,
+                           },
+                           series: {
+                               pie: {
+                                   show: true,
+                                   innerRadius: 0.3,
+                                   label: {
+                                     formatter: function(label, series) { return ""; },
+                                   }
+                               }
+                           }
+                           
+                      });
        
-       $("#parties-loading").slideUp();
+       $("#parties-loading").hide();
        
   }, function(e) {
      console.log("Request failed");
@@ -279,16 +329,10 @@ function plotIssuesTimeseries(issues, sources) {
          xaxis: {
             mode: "categories",
              tickLength: 0
-          }
-         // series: {
-         //     pie: {
-         //         show: true,
-         //         innerRadius: 0.3,
-         //     }
-         // }
+         }
      });
      
-     $("#issues-timeseries-loading").slideUp();
+     $("#issues-timeseries-loading").hide();
 
   }, function(e) {
      console.log("Request failed");
@@ -301,13 +345,20 @@ function getMentions(thing, sources, start, end, timeseries) {
   $(sources).each(function(index, source) {
     url += "&sources[]="+source;
   });
-
-  if (thing.uri)
+  
+  // ALlow thing.uri to be string with a URI OR array of strings containing URIs
+  if (thing.uri && !$.isArray(thing.uri))
+    thing.uri = [ thing.uri ];
+  
+  $(thing.uri).each(function(index, uri) {
     url += "&facets[]="+encodeURIComponent(thing.uri)
+  });
     
   if (thing.query)
     url += "&q="+encodeURIComponent(thing.query)
   
+  console.log(url);
+
   return $.ajax({
     url: url,
     type: "GET",

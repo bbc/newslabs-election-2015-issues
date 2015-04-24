@@ -22,40 +22,53 @@
     <script type="text/javascript" src="js/application.js"></script>
   </head>
   <body>
-    <div class="navbar navbar-default navbar-static-top no-margin">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".header-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="http://bbcnewslabs.co.uk"><img src="img/bbc-logo.png" class="pull-left" style="height: 70%; margin-right: 10px;"/> News Labs</a>
-        </div>
-        <div class="collapse navbar-collapse header-collapse">
-          <p class="navbar-btn navbar-right"><a href="http://twitter.com/BBC_News_Labs" target="_blank" class="btn btn-primary navbar-link"><i class="fa fa-lg fa-twitter"></i> Follow News Labs</a></p>
-        </div>
-      </div>
-    </div>
-    <div class="jumbotron page-heading">
-      <div class="container">
-        <div class="row">
-          <div class="col-md-9">
-            <h1>Election 2015: <strong>The issues </strong></h1>
-            <p class="text-muted">Media coverage of issues in the run up to the election</p>
+    <div class="navbar-fixed-top">
+      <div class="navbar navbar-default no-margin" style="border: 0">
+        <div class="container">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".header-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://bbcnewslabs.co.uk"><img src="img/bbc-logo.png" class="pull-left" style="height: 70%; margin-right: 10px;"/> News Labs</a>
           </div>
-          <div class="col-md-3">
-            <div style="height: 60px;">
-              <select name="source" class="form-control input-lg">
-                <option value="all">Cross media coverage<option>
-              </select>
+          <div class="collapse navbar-collapse header-collapse">
+            <p class="navbar-btn navbar-right"><a href="http://twitter.com/BBC_News_Labs" target="_blank" class="btn btn-primary navbar-link"><i class="fa fa-lg fa-twitter"></i> Follow News Labs</a></p>
+          </div>
+        </div>
+        <div class="jumbotron page-heading" style="margin-bottom: 0px;">
+          <div class="container">
+            <div class="row">
+              <div class="col-md-9">
+                <h1>Election 2015: <strong>The issues </strong></h1>
+                <p class="text-muted">Media coverage of issues in the run up to the UK General Election</p>
+              </div>
+              <div class="col-md-3">
+                <div style="height: 70px; padding-top: 10px;">
+                  <select name="source" class="form-control input-lg">
+                    <option value="all">Cross media coverage<option>
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="container">
+    <div class="container" style="padding-top: 160px;">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="visible-xs">
+            <br/><br/><br/><br/><br/><br/>
+          </div>
+          <div class="visible-sm">
+            <br/><br/><br/>
+          </div>
+          <p class="lead text-muted text-center">A visual comparison of mentions of parties or issues in articles</p>
+        </div>
+      </div>
       <!--
       <div class="row">
         <div class="col-md-2 col-md-offset-2">
@@ -85,17 +98,22 @@
       <div class="row">
         <div class="col-md-12">
           <h2 class="text-center"><i class="fa fa-fw fa-line-chart"></i> Parties in the media</h2>
+          <br/>
           <div id="parties-loading">
             <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
           </div>
-          <div id="parties" class="row">
-            <div class="col-md-9">
+          <div class="row">
+            <div id="parties" class="col-md-6">
               <div class="graph" style="height: 300px;"></div>
               <br/>
             </div>
+            <div id="parties-pie" class="col-md-3">
+              <div class="graph lead" style="height: 300px;">
+              </div>
+            </div>
             <div class="col-md-3">
-              <div class="hidden-sm hidden-xs" style="height: 50px;">&nbsp;</div>
-              <div class="legend" class="lead"></div>
+              <div class="hidden-sm hidden-xs" style="height: 80px;">&nbsp;</div>
+              <div id="parties-legend" class="lead legend"></div>
             </div>
           </div>
         </div>
@@ -106,10 +124,12 @@
         <div class="row">
           <div class="col-md-12">
             <h2 class="text-center"><i class="fa fa-fw fa-bar-chart"></i> Issues in the media</h2>
+            <br/>
             <div id="issues-timeseries-loading">
               <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
             </div>
-            <div id="issues-totals" style="height: 200px;"></div>
+            <div id="issues-totals" class="graph" style="height: 200px;"></div>
+            <br/>
             <div id="issues-timeseries"></div>
             <br/>
           </div>

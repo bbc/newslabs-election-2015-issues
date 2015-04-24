@@ -89,14 +89,6 @@ $(document).on("change", 'select[name="source"]', function(event) {
   updatePage();
 });
 
-// Redraw page on window resize
-$(window).resize(function() {
-    clearTimeout($.data(this, 'resizeTimer'));
-    $.data(this, 'resizeTimer', setTimeout(function() {
-      updatePage();
-    }, 1000));
-});
-
 $(function() {
   getSourcesFromJuicer();
   updatePage();
@@ -159,7 +151,6 @@ function plotPartiesGraph(things, sources) {
       
         var colors = [];
         $(timeseries).each(function(index, thing) {
-          console.log(thing);
           totals.push({ label: thing.label, data: [ thing.total] });
           colors.push(thing.color);
         });
@@ -356,8 +347,6 @@ function getMentions(thing, sources, start, end, timeseries) {
     
   if (thing.query)
     url += "&q="+encodeURIComponent(thing.query)
-  
-  console.log(url);
 
   return $.ajax({
     url: url,

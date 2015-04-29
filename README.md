@@ -1,8 +1,10 @@
-# Election Issue Coverage Comparion
+# Election 2015 Issue Coverage
 
 A tool to compare coverage of issues around the election across the media.
 
 http://election-2015-issues.bbcnewslabs.co.uk
+
+Note: This experiment is still in development - the website is password protected outside of the BBC network.
 
 ## Installation instructions
 

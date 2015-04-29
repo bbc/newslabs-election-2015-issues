@@ -1,14 +1,21 @@
-
+/**
+ * An experimental look at coverage of issues in the media, in the run up to 
+ * the UK 2015 General Election using BBC News Labs data.
+ *
+ * Iain Collins & Sylvia Tippmann
+ */
 var juicer = {
     apikey: '9OHbOpZpVh9tQZBDjwTlTmsCF2Ce0yGQ',
     host: "http://data.test.bbc.co.uk/bbcrd-juicer"
 };
 
-// IDs of media sources to use
+// Whitelist of IDs of media sources in the Juicer to use in our comparisons
 var sources = [1, 3, 8, 10, 11, 12, 22, 23, 24, 40, 42, 43, 45, 71, 72, 85];
-var selectedSources = sources;
 
-// URIs of political parties to include in comparison chart
+// An array of one or more currently selected sources
+var currentlySelectedSources = sources;
+
+// An array of paries with URIs, labels and colours for each one
 var parties = [ { name: "Labour Party",
                   uri: "http://dbpedia.org/resource/Labour_Party_(UK)",
                   color: "#F42E22"
@@ -34,9 +41,11 @@ var parties = [ { name: "Labour Party",
                   color: "#FFE100"
                 }
               ];
-              
+          
+// An array of topics, with a name and query for each topic
+// NB: This is extermely subjective
 var issues = [ {  name: "Education",
-                  query: "education OR schools OR university OR universities"
+                  query: "education OR schools OR universities"
                 },
                 { name: "Immigration",
                   query: "immigration OR immigrants OR migrants"
@@ -45,7 +54,7 @@ var issues = [ {  name: "Education",
                   query: "economy OR economics"
                 },
                 { name: "Law and Order",
-                  query: "crime OR policing OR prisons"
+                  query: 'policing OR prisons'
                 },
                 { name: "Healthcare",
                   query: 'NHS OR "National Health Service" OR healthcare'
@@ -57,10 +66,10 @@ var issues = [ {  name: "Education",
                   query: '"European Union" OR EU'
                 },
                 { name: "Taxation",
-                  query: 'tax OR taxation'
+                  query: 'tax OR taxes OR taxation OR VAT'
                 },
                 { name: "Housing",
-                  query: 'houses OR house OR housing'
+                  query: '"new houses" OR "new build" OR housing'
                 }
               ];
               
@@ -70,30 +79,42 @@ var issuesGraphAxis = 0;
 var start = "2015-01-01T00:00:00.000Z";
 var end = "2015-05-08T00:00:00.000";
 
+/*
+// @todo Not Implimented Yet
+// Toggle view of data by gender
 $(document).on("touch click", '#male', function(event) {
   $('#female').removeClass('active btn-primary');
   $('#male').toggleClass('active btn-primary');
 });
-
 $(document).on("touch click", '#female', function(event) {
   $('#male').removeClass('active btn-primary');
   $('#female').toggleClass('active btn-primary');
 });
+*/
 
+// When an item in the dropdown list is selected update currentlySelectedSources
 $(document).on("change", 'select[name="source"]', function(event) {
   if ($(this).val() == "all") {
-    selectedSources = sources;
+    // If the value is "all" update currentlySelectedSources to contain all sources
+    currentlySelectedSources = sources;
   } else {
-    selectedSources = [ $(this).val() ];
+    // Update currentlySelectedSources to contain only  the ID of the selected source
+    currentlySelectedSources = [ $(this).val() ];
   }
   updatePage();
 });
 
+/**
+ * On page load, get sources from the Juicer and update the page
+ */
 $(function() {
   getSourcesFromJuicer();
   updatePage();
 });
 
+/**
+ * Get Juicer sources on load (to populate drop down)
+ */
 function getSourcesFromJuicer() {
   $("#juicer-loading").show();
   var juicerSources = $("#juicer-sources");
@@ -107,7 +128,7 @@ function getSourcesFromJuicer() {
       var select = $('select[name="source"]');
       $.each(response, function(key, value) {
         
-        // Only show whitelisted sources
+        // Only show white listed sources
         if ($.inArray(value.id, sources) < 0)
           return;
         
@@ -122,18 +143,24 @@ function getSourcesFromJuicer() {
   });
 };
 
+/**
+ * Update the page (resets all graphs and shows loading graphics)
+ */
 function updatePage() {
-  // Reset all graphs and show all loading graphics
-  $(".graph").html('');
-  $(".legend").html('');
+  // Dimm all graphs and show all loading graphics while they are being redrawn
+  $(".graph").css({ opacity: 0.2 });
+  $(".legend").css({ opacity: 0.2 });
   $("#parties-loading").show();
   $("#issues-timeseries-loading").show();
 
-  plotPartiesGraph(parties, selectedSources);
-  plotIssuesTimeseries(issues, selectedSources);
+  drawPartiesGraphs(parties, currentlySelectedSources);
+  drawIssuesGraphs(issues, currentlySelectedSources);
 }
 
-function plotPartiesGraph(things, sources) {
+/**
+ * Plot the graph and pie chart showing mentions of parties
+ */
+function drawPartiesGraphs(things, sources) {
   var promises = [];
   var timeseries = [];
 
@@ -154,7 +181,7 @@ function plotPartiesGraph(things, sources) {
           totals.push({ label: thing.label, data: [ thing.total] });
           colors.push(thing.color);
         });
-                
+        
        // Draw graph
        var graph = $.plot("#parties .graph",
                           timeseries,
@@ -162,14 +189,13 @@ function plotPartiesGraph(things, sources) {
                            shadowSize: 0,
                            colors: colors,
                            grid: { borderWidth: 0 },
-                           xaxis: { mode: "time",
-                                    tickLength: 0,
+                           xaxis: {  mode: "time",
+                                    //tickLength: 1,
                                     timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
-                                    minTickSize: [5, 'day'], 
+                                    minTickSize: [10, 'day']
                             },
                             yaxis: { tickLength: 0,
-                                     tickDecimals: 0,
-                                     minTickSize: 1
+                                     tickDecimals: 0
                             },
                             lines: {
                               show: true,
@@ -222,6 +248,9 @@ function plotPartiesGraph(things, sources) {
                       });
        
        $("#parties-loading").hide();
+       $("#parties .graph").css({ opacity: 1 });
+       $("#parties-legend").css({ opacity: 1 });
+       $("#parties-pie .graph").css({ opacity: 1 });
        
   }, function(e) {
      console.log("Request failed");
@@ -229,33 +258,13 @@ function plotPartiesGraph(things, sources) {
 }
 
 
-function plotIssuesTimeseries(issues, sources) {
-  var graphOptions = {
-       shadowSize: 0,
-       colors: [ "#CA0914" ],
-       grid: { borderWidth: 0 },
-       xaxis: { mode: "time",
-                tickLength: 0,
-                timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
-                minTickSize: [5, 'day'], 
-        },
-        yaxis: { tickLength: 0,
-                 tickDecimals: 0,
-                 minTickSize: 1
-        },
-        bars: {
-          show: true,
-          steps: false,
-          lineWidth: 3,
-          fill: true
-        },
-        legend: { show: false }
-  };  
+/**
+ * Plot the bar charts for mentions of issues
+ */
+function drawIssuesGraphs(issues, sources) { 
   var promises = [];
   var timeseries = [];
   var issueTotalsData = [];
-  
-  $('#issues-timeseries').html('');
   
   $(issues).each(function(index, issue) {
     timeseries[index] = [];
@@ -267,6 +276,7 @@ function plotIssuesTimeseries(issues, sources) {
       var maxGraphYAxis = 10;
       var colors = [];
       
+      $('#issues-timeseries').html('');
       $(timeseries).each(function(index, thing) {
         //issueTotalsData.push( { label: thing[0].label, data: [ thing[0].total ] });
         issueTotalsData.push([ thing[0].label, thing[0].total ]);
@@ -283,22 +293,44 @@ function plotIssuesTimeseries(issues, sources) {
          });
       });
 
-      graphOptions.yaxis.max = maxGraphYAxis;
-
      // Draw graph
       $(timeseries).each(function(index, thing) {
-        var graph = $.plot('#issue-'+index+' .graph', timeseries[index], graphOptions);
+        $.plot('#issue-'+index+' .graph',
+          timeseries[index],
+          {
+             shadowSize: 0,
+             colors: [ "#CA0914" ],
+             grid: { borderWidth: 0 },
+             xaxis: { mode: "time",
+                      tickLength: 0,
+                      timeformat: "%d<br>%b", // @todo Add %Y if start+end years differ
+                      minTickSize: [5, 'day'], 
+              },
+              yaxis: { tickLength: 0,
+                       tickDecimals: 0,
+                       minTickSize: 1,
+                       max: maxGraphYAxis
+              },
+              bars: {
+                show: true,
+                steps: false,
+                lineWidth: 3,
+                fill: true
+              },
+              legend: { show: false }
+          });
       });
   
-      /*
+     /*
+     // Sort graphs of issues by most mentions first
      var wrapper = $('#issues-timeseries');
      wrapper.find('div.sort').sort(function (a, b) {
        return $(b).attr('data-sort') - $(a).attr('data-sort');
      })
      .appendTo( wrapper );
-      */
+     */
      
-     // Sort by most results
+     // Sort totals graph by most results
      // issueTotalsData.sort(function(a,b) { return b[1] - a[1]; } );
      
      $.plot('#issues-totals', [ issueTotalsData ], {
@@ -322,16 +354,23 @@ function plotIssuesTimeseries(issues, sources) {
              tickLength: 0
          }
      });
-     
+
      $("#issues-timeseries-loading").hide();
+     $("#issues-totals").css({ opacity: 1 });
 
   }, function(e) {
      console.log("Request failed");
   });
 }
 
-function getMentions(thing, sources, start, end, timeseries) {
-  var url = juicer.host+"/articles?size=0&published_before="+end+"&published_after="+start+"&apikey="+juicer.apikey;
+/**
+ * Get mentions for one or more URIs and/or a query in the Juicer
+ */
+function getMentions(thing, sources, start, end, timeseries, size) {
+  if (!size)
+    size = 0;
+  
+  var url = juicer.host+"/articles?size="+size+"&published_before="+end+"&published_after="+start+"&apikey="+juicer.apikey;
   
   $(sources).each(function(index, source) {
     url += "&sources[]="+source;

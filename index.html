@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
-    <title>BBC News Labs - Compare Media Coverage</title>
+    <title>BBC News Labs - Election 2015 Issues</title>
     <link rel="stylesheet" href="bower_components/bbcnewslabs-bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css"/>
@@ -42,7 +42,7 @@
           <div class="container">
             <div class="row">
               <div class="col-md-9">
-                <h1>Election 2015: <strong>The issues </strong></h1>
+                <h1><span class="text-muted">ELECTION <strong>2015</strong></span> <strong>The issues </strong></h1>
                 <p class="hidden-sm hidden-xs text-muted">Media coverage of issues in the run up to the UK General Election</p>
               </div>
               <div class="col-md-3">
@@ -95,7 +95,7 @@
         <div class="col-md-12">
           <h2 class="text-center"><i class="fa fa-fw fa-line-chart"></i> Parties in the media</h2>
           <br/>
-          <div id="parties-loading">
+          <div id="parties-loading" class="loading">
             <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
           </div>
           <div class="row">
@@ -121,7 +121,7 @@
           <div class="col-md-12">
             <h2 class="text-center"><i class="fa fa-fw fa-bar-chart"></i> Issues in the media</h2>
             <br/>
-            <div id="issues-timeseries-loading">
+            <div id="issues-timeseries-loading" class="loading">
               <h3 class="text-center"><i class="fa fa-fw fa-refresh fa-spin"></i> Updating...</h3>
             </div>
             <div id="issues-totals" class="graph" style="height: 200px;"></div>
@@ -133,14 +133,13 @@
       </div>
     </div>
     <div class="container">
-      <div style="padding: 20px;">
-        <div id="results" class="row"></div>
-        <div class="row">
-          <div class="col-md-12">
-            <p class="lead text-center text-muted" style="margin-top: 20px; margin-bottom: 10px;">
-              Powered by the Juicer from BBC News Labs.
-            </p>
-          </div>
+      <div class="row">
+        <div class="col-md-12">
+          <p class="lead text-center text-muted" style="margin-top: 20px;">
+            Created by Iain Collins &amp; Sylvia Tippman
+            <br/>
+            Using data from the BBC News Labs Juicer
+          </p>
         </div>
       </div>
     </div>

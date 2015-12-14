@@ -6,6 +6,8 @@ http://election-2015-issues.bbcnewslabs.co.uk
 
 Note: This experiment is still in development - the website is password protected outside of the BBC network.
 
+![Screenshot](screenshot.png) 
+
 ## Installation instructions
 
 This app runs in the browser and makes calls to the [BBC News Labs](http://bbcnewslabs.co.uk) Juicer API.

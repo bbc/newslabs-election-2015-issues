@@ -6,7 +6,7 @@
  */
 var juicer = {
     apikey: '9OHbOpZpVh9tQZBDjwTlTmsCF2Ce0yGQ',
-    host: "http://data.test.bbc.co.uk/bbcrd-juicer"
+    host: "http://data.bbc.co.uk/bbcrd-juicer"
 };
 
 // Whitelist of IDs of media sources in the Juicer to use in our comparisons
@@ -370,7 +370,7 @@ function getMentions(thing, sources, start, end, timeseries, size) {
   if (!size)
     size = 0;
   
-  var url = juicer.host+"/articles?size="+size+"&published_before="+end+"&published_after="+start+"&apikey="+juicer.apikey;
+  var url = juicer.host+"/articles?size="+size+"&hist_interval=day&published_before="+end+"&published_after="+start+"&apikey="+juicer.apikey;
   
   $(sources).each(function(index, source) {
     url += "&sources[]="+source;
